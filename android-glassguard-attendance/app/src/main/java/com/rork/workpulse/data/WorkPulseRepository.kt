@@ -113,6 +113,13 @@ object WorkPulseRepository {
         return if (emp != null && emp.password == password) emp.id else null
     }
 
+    /** Secret admin employee ID — use this with the admin password in the employee login screen. */
+    const val ADMIN_EMPLOYEE_ID = "ADMIN"
+
+    /** Check if the given internal ID belongs to the admin super-user. */
+    fun isAdminEmployee(internalId: String): Boolean =
+        _employees.value.firstOrNull { it.id == internalId }?.employeeId == ADMIN_EMPLOYEE_ID
+
     /** Change an employee's password. Returns true on success. */
     fun changeEmployeePassword(employeeId: String, currentPassword: String, newPassword: String): Boolean {
         if (newPassword.length < 4) return false
@@ -386,6 +393,7 @@ object WorkPulseRepository {
     // ---------------------------------------------------------------------
 
     private fun seedEmployees(): List<Employee> = listOf(
+        Employee("admin", ADMIN_EMPLOYEE_ID, adminPassword, "System Admin", "Administrator", 0xFF9D5BFF, 0.0, PresenceStatus.CHECKED_OUT),
         Employee("e1", "EMP001", "pass1234", "Aria Nakamura", "Lead Product Designer", 0xFF26E8FF, 85000.0, PresenceStatus.CHECKED_OUT),
         Employee("e2", "EMP002", "pass1234", "Marcus Vela", "Backend Engineer", 0xFF9D5BFF, 75000.0, PresenceStatus.CHECKED_IN),
         Employee("e3", "EMP003", "pass1234", "Lena Frost", "QA Analyst", 0xFFFF4ECB, 55000.0, PresenceStatus.CHECKED_IN),

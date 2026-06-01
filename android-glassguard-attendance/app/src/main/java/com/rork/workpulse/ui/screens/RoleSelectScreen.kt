@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.AdminPanelSettings
 import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
@@ -91,17 +90,9 @@ fun RoleSelectScreen(onSelect: (Role) -> Unit) {
             RoleCard(
                 icon = Icons.Filled.Person,
                 accent = WP.Cyan,
-                title = "I'm an Employee",
-                subtitle = "Geofenced check-in, leave & salary",
+                title = "Sign In",
+                subtitle = "Enter your employee ID & password",
                 onClick = { onSelect(Role.EMPLOYEE) },
-            )
-            Spacer(Modifier.height(16.dp))
-            RoleCard(
-                icon = Icons.Filled.AdminPanelSettings,
-                accent = WP.Purple,
-                title = "I'm an Admin",
-                subtitle = "Live workforce, approvals & payroll",
-                onClick = { onSelect(Role.ADMIN) },
             )
         }
     }

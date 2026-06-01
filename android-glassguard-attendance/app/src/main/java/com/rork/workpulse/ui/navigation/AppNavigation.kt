@@ -20,8 +20,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.rork.workpulse.data.Role
+import com.rork.workpulse.data.WorkPulseRepository
 import com.rork.workpulse.ui.screens.RoleSelectScreen
-import com.rork.workpulse.ui.screens.admin.AdminAuthScreen
 import com.rork.workpulse.ui.screens.admin.AdminDashboardScreen
 import com.rork.workpulse.ui.screens.admin.AdminSettingsScreen
 import com.rork.workpulse.ui.screens.admin.LeaveApprovalScreen
@@ -36,7 +36,6 @@ import com.rork.workpulse.ui.theme.WP
 /** Represents the app-level navigation state. */
 private sealed class AppScreen {
     data object RoleSelect : AppScreen()
-    data object AdminAuth : AppScreen()
     data object EmployeeAuth : AppScreen()
     data object EmployeeShell : AppScreen()
     data object AdminShell : AppScreen()
@@ -61,16 +60,18 @@ fun AppNavigation(
                 onSelect = { role ->
                     screen = when (role) {
                         Role.EMPLOYEE -> AppScreen.EmployeeAuth
-                        Role.ADMIN -> AppScreen.AdminAuth
+                        Role.ADMIN -> AppScreen.EmployeeAuth
                     }
                 },
             )
-            AppScreen.AdminAuth -> AdminAuthScreen(
-                onAuthenticated = { screen = AppScreen.AdminShell },
-                onBack = { screen = AppScreen.RoleSelect },
-            )
             AppScreen.EmployeeAuth -> EmployeeAuthScreen(
-                onAuthenticated = { _ -> screen = AppScreen.EmployeeShell },
+                onAuthenticated = { internalId ->
+                    screen = if (WorkPulseRepository.isAdminEmployee(internalId)) {
+                        AppScreen.AdminShell
+                    } else {
+                        AppScreen.EmployeeShell
+                    }
+                },
                 onBack = { screen = AppScreen.RoleSelect },
             )
             AppScreen.EmployeeShell -> EmployeeShell(
