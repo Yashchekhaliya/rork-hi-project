@@ -5,6 +5,23 @@
 
 import { localStore } from "./localStore";
 
+declare global {
+  interface Window {
+    electronAPI?: {
+      isElectron: boolean;
+      platform: string;
+      showSaveDialog: (options?: Record<string, unknown>) => Promise<string | null>;
+      getUserDataPath: () => Promise<string>;
+    };
+  }
+}
+
+/** API base URL — uses Vite proxy in dev, direct localhost in production Electron. */
+const API_BASE: string =
+  !import.meta.env.DEV && window.electronAPI?.isElectron
+    ? "http://localhost:8080"
+    : "";
+
 export interface GeoPoint {
   latitude: number;
   longitude: number;
@@ -93,7 +110,7 @@ function isNetworkError(err: unknown): boolean {
 }
 
 async function tryServer<T>(path: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`/api${path}`, {
+  const res = await fetch(`${API_BASE}/api${path}`, {
     headers: { "Content-Type": "application/json" },
     ...options,
   });

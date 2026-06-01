@@ -1,2 +1,12 @@
-#!/bin/bash
-exec "$(dirname "$0")/node_modules/.bin/vite" "$@"
+#!/usr/bin/env node
+// Wrapper for vite CLI — used by runChecks build environment
+const { spawnSync } = require("child_process");
+const path = require("path");
+
+const cwd = __dirname;
+const result = spawnSync(
+  path.join(cwd, "node_modules", ".bin", "vite"),
+  process.argv.slice(2),
+  { cwd, stdio: "inherit", shell: true }
+);
+process.exit(result.status ?? 1);
