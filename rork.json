@@ -1,0 +1,15 @@
+{
+  "apps": [
+    {
+      "name": "Med Lion HR",
+      "path": "android-glassguard-attendance",
+      "framework": "kotlin"
+    },
+    {
+      "name": "Med Lion HR Web",
+      "path": "web-med-lion-hr-web",
+      "framework": "web"
+    }
+  ],
+  "$schema": "https://rork.com/schema/rork.json"
+}
