@@ -69,7 +69,7 @@ fun DashboardScreen(modifier: Modifier = Modifier) {
     }
     LaunchedEffect(Unit) { vm.refreshLocation() }
 
-    val accent = if (checkedIn) WP.Lime else WP.Cyan
+    val accent = if (checkedIn) WP.Green else WP.Blue
 
     Column(
         modifier = modifier

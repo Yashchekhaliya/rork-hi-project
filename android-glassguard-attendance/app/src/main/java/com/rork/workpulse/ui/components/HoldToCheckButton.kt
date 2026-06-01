@@ -142,7 +142,7 @@ fun HoldToCheckButton(
                     if (progress > 0f) {
                         drawArc(
                             brush = Brush.sweepGradient(
-                                listOf(accent, WP.Cyan, accent),
+                                listOf(accent, WP.Blue, accent),
                                 center = center,
                             ),
                             startAngle = -90f,
@@ -158,7 +158,7 @@ fun HoldToCheckButton(
                         rotate(sweep, center) {
                             drawArc(
                                 brush = Brush.sweepGradient(
-                                    listOf(Color.Transparent, accent.copy(alpha = 0.6f), Color.Transparent),
+                                    listOf(Color.Transparent, accent.copy(alpha = 0.7f), Color.Transparent),
                                     center = center,
                                 ),
                                 startAngle = 0f,

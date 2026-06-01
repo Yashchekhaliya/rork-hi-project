@@ -25,21 +25,24 @@ const Dashboard = ({ onLogout }: { onLogout: () => void }) => {
   const [tab, setTab] = useState<TabId>("live");
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-4 py-6 md:px-8">
+    <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-7xl flex-col px-4 py-6 md:px-8">
       {/* Header */}
       <header className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="glass flex h-11 w-11 items-center justify-center rounded-xl border-primary/30">
-            <ShieldCheck className="h-6 w-6 text-primary" />
+          <div className="glass flex h-12 w-12 items-center justify-center rounded-xl border-primary/30 shadow-lg shadow-primary/10">
+            <ShieldCheck className="h-6 w-6 text-primary glow-text" />
           </div>
           <div>
             <h1 className="text-lg font-bold leading-tight tracking-tight">Med Lion HR</h1>
-            <p className="text-xs text-muted-foreground">Admin Control Center</p>
+            <div className="flex items-center gap-2">
+              <span className="flex h-1.5 w-1.5 rounded-full bg-success animate-pulse-dot" />
+              <p className="text-xs text-muted-foreground">Admin Control Center</p>
+            </div>
           </div>
         </div>
         <button
           onClick={onLogout}
-          className="glass glass-hover flex items-center gap-2 rounded-xl border-destructive/30 px-4 py-2.5 text-sm font-medium text-destructive"
+          className="glass-danger glass-hover flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium text-destructive transition-all hover:border-destructive/50"
         >
           <LogOut className="h-4 w-4" />
           <span className="hidden sm:inline">Log out</span>
@@ -56,9 +59,9 @@ const Dashboard = ({ onLogout }: { onLogout: () => void }) => {
               key={t.id}
               onClick={() => setTab(t.id)}
               className={cn(
-                "flex flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-medium transition-all",
+                "flex flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-300",
                 active
-                  ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+                  ? "btn-premium text-primary-foreground"
                   : "text-muted-foreground hover:bg-white/5 hover:text-foreground",
               )}
             >

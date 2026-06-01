@@ -20,8 +20,6 @@ const Login = ({ onLogin }: { onLogin: () => void }) => {
       toast.success("Welcome back, admin");
       onLogin();
     } catch (err) {
-      // If the server is unreachable (e.g. preview/demo mode), fall back to
-      // checking against the default password client-side.
       const message = err instanceof Error ? err.message : "Login failed";
       const isNetworkError =
         message.includes("fetch failed") ||
@@ -44,14 +42,24 @@ const Login = ({ onLogin }: { onLogin: () => void }) => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-6">
-      <div className="glass animate-fade-up w-full max-w-md p-8">
+    <div className="relative flex min-h-screen items-center justify-center p-6">
+      {/* Floating accent ring behind the card */}
+      <div className="pointer-events-none absolute left-1/2 top-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 animate-glow-pulse rounded-full bg-gradient-radial from-primary/10 to-transparent" />
+
+      <div className="glass animate-scale-in relative z-10 w-full max-w-md p-8">
         <div className="mb-8 flex flex-col items-center text-center">
-          <div className="glass mb-5 flex h-16 w-16 items-center justify-center rounded-2xl border-primary/30">
-            <ShieldCheck className="h-8 w-8 text-primary glow-text" />
+          <div className="glass mb-5 flex h-18 w-18 items-center justify-center rounded-2xl border-primary/30 shadow-lg shadow-primary/10">
+            <ShieldCheck className="h-9 w-9 text-primary glow-text" />
           </div>
           <h1 className="text-2xl font-bold tracking-tight">Med Lion HR</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Admin Control Center</p>
+          <p className="mt-1.5 text-sm text-muted-foreground">Admin Control Center</p>
+
+          {/* Status dots */}
+          <div className="mt-4 flex items-center gap-2">
+            <span className="flex h-2 w-2 rounded-full bg-success animate-pulse-dot" />
+            <span className="text-xs text-muted-foreground">Secure Channel</span>
+            <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse-dot" style={{ animationDelay: "0.6s" }} />
+          </div>
         </div>
 
         <form onSubmit={submit} className="space-y-4">
@@ -63,13 +71,13 @@ const Login = ({ onLogin }: { onLogin: () => void }) => {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Admin password"
               autoFocus
-              className="glass w-full rounded-xl py-3.5 pl-11 pr-4 text-sm outline-none placeholder:text-muted-foreground focus:border-primary/50"
+              className="glass w-full rounded-xl py-3.5 pl-11 pr-4 text-sm outline-none placeholder:text-muted-foreground focus:border-primary/50 transition-all duration-300"
             />
           </div>
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-xl bg-primary py-3.5 text-sm font-semibold text-primary-foreground transition-all hover:brightness-110 disabled:opacity-60"
+            className="btn-premium w-full py-3.5 text-sm text-primary-foreground disabled:opacity-60"
           >
             {loading ? "Verifying…" : "Enter Dashboard"}
           </button>

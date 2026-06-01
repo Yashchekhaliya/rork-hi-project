@@ -68,7 +68,7 @@ fun RoleSelectScreen(onSelect: (Role) -> Unit) {
                     .scale(pulse)
                     .drawBehind {
                         drawCircle(
-                            brush = Brush.radialGradient(listOf(WP.Cyan.copy(alpha = 0.5f), Color.Transparent)),
+                            brush = Brush.radialGradient(listOf(WP.Blue.copy(alpha = 0.5f), Color.Transparent)),
                             radius = size.minDimension * 0.7f,
                         )
                     },
@@ -76,10 +76,10 @@ fun RoleSelectScreen(onSelect: (Role) -> Unit) {
             ) {
                 Box(
                     modifier = Modifier.size(96.dp).clip(CircleShape)
-                        .glass(cornerRadius = 96.dp, fillTop = WP.Cyan.copy(alpha = 0.3f), fillBottom = WP.Purple.copy(alpha = 0.15f)),
+                        .glass(cornerRadius = 96.dp, fillTop = WP.Blue.copy(alpha = 0.3f), fillBottom = WP.SkyBlue.copy(alpha = 0.15f)),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Icon(Icons.Filled.Fingerprint, null, tint = WP.Cyan, modifier = Modifier.size(48.dp))
+                    Icon(Icons.Filled.Fingerprint, null, tint = WP.Blue, modifier = Modifier.size(48.dp))
                 }
             }
             Spacer(Modifier.height(28.dp))
@@ -89,7 +89,7 @@ fun RoleSelectScreen(onSelect: (Role) -> Unit) {
 
             RoleCard(
                 icon = Icons.Filled.Person,
-                accent = WP.Cyan,
+                accent = WP.Blue,
                 title = "Sign In",
                 subtitle = "Enter your employee ID & password",
                 onClick = { onSelect(Role.EMPLOYEE) },

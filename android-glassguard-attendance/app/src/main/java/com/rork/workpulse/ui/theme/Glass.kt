@@ -11,8 +11,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /**
- * Frosted glass surface that works on every API level (no RenderEffect dependency).
- * Layers a soft vertical highlight gradient over a translucent fill with a bright top border.
+ * Premium frosted glass surface — multi-layer gradient fill with
+ * a bright top-border highlight and deep base frost.
+ *
+ * Colors cascade from crisp white → blue-tinted frost → deep navy base.
  */
 fun Modifier.glass(
     cornerRadius: Dp = 24.dp,
@@ -21,16 +23,28 @@ fun Modifier.glass(
     borderColor: Color = WP.GlassBorder,
 ): Modifier = this
     .clip(RoundedCornerShape(cornerRadius))
-    .background(Brush.verticalGradient(listOf(fillTop, fillBottom)))
+    .background(
+        Brush.verticalGradient(
+            listOf(
+                fillTop,                                    // Crisp highlight
+                Color.White.copy(alpha = 0.04f),           // Mid frost
+                fillBottom,                                 // Deep glass base
+                WP.BgDeep.copy(alpha = 0.30f),             // Subtle navy anchor
+            ),
+        )
+    )
     .border(
         width = 1.dp,
         brush = Brush.verticalGradient(
-            listOf(borderColor, borderColor.copy(alpha = borderColor.alpha * 0.25f))
+            listOf(borderColor, borderColor.copy(alpha = borderColor.alpha * 0.18f))
         ),
         shape = RoundedCornerShape(cornerRadius),
     )
 
-/** A glass surface tinted with a neon accent — used for hero / highlighted panels. */
+/**
+ * Neon-tinted glass surface — used for hero/highlighted panels.
+ * Adds a blue glow aura for the new premium palette.
+ */
 fun Modifier.neonGlass(
     accent: Color,
     cornerRadius: Dp = 24.dp,
@@ -38,13 +52,61 @@ fun Modifier.neonGlass(
     .clip(RoundedCornerShape(cornerRadius))
     .background(
         Brush.verticalGradient(
-            listOf(accent.copy(alpha = 0.20f), accent.copy(alpha = 0.04f))
+            listOf(
+                accent.copy(alpha = 0.14f),                 // Colored highlight
+                accent.copy(alpha = 0.06f),                 // Mid tint
+                accent.copy(alpha = 0.02f),                 // Fade to base
+            )
         )
     )
     .border(
         width = 1.dp,
         brush = Brush.verticalGradient(
-            listOf(accent.copy(alpha = 0.55f), accent.copy(alpha = 0.10f))
+            listOf(accent.copy(alpha = 0.50f), accent.copy(alpha = 0.08f))
+        ),
+        shape = RoundedCornerShape(cornerRadius),
+    )
+
+/**
+ * Premium glass panel with a green success tint.
+ */
+fun Modifier.successGlass(cornerRadius: Dp = 24.dp): Modifier = this
+    .clip(RoundedCornerShape(cornerRadius))
+    .background(
+        Brush.verticalGradient(
+            listOf(
+                WP.Green.copy(alpha = 0.12f),
+                WP.Green.copy(alpha = 0.04f),
+                WP.Green.copy(alpha = 0.01f),
+            )
+        )
+    )
+    .border(
+        width = 1.dp,
+        brush = Brush.verticalGradient(
+            listOf(WP.Green.copy(alpha = 0.45f), WP.Green.copy(alpha = 0.06f))
+        ),
+        shape = RoundedCornerShape(cornerRadius),
+    )
+
+/**
+ * Premium glass panel with a red danger tint.
+ */
+fun Modifier.dangerGlass(cornerRadius: Dp = 24.dp): Modifier = this
+    .clip(RoundedCornerShape(cornerRadius))
+    .background(
+        Brush.verticalGradient(
+            listOf(
+                WP.Red.copy(alpha = 0.12f),
+                WP.Red.copy(alpha = 0.04f),
+                WP.Red.copy(alpha = 0.01f),
+            )
+        )
+    )
+    .border(
+        width = 1.dp,
+        brush = Brush.verticalGradient(
+            listOf(WP.Red.copy(alpha = 0.45f), WP.Red.copy(alpha = 0.06f))
         ),
         shape = RoundedCornerShape(cornerRadius),
     )

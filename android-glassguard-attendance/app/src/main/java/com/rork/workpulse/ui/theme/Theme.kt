@@ -8,19 +8,26 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
+/**
+ * Premium Blue / White / Green / Red color scheme.
+ * Deep navy base, royal blue primary, crisp white text,
+ * emerald green success, crimson red danger.
+ */
 private val WorkPulseColorScheme = darkColorScheme(
-    primary = WP.Cyan,
-    onPrimary = WP.BgDeep,
-    secondary = WP.Purple,
+    primary = WP.RoyalBlue,
+    onPrimary = WP.TextPrimary,
+    secondary = WP.SkyBlue,
     onSecondary = WP.TextPrimary,
-    tertiary = WP.Magenta,
+    tertiary = WP.Green,
+    onTertiary = WP.TextPrimary,
     background = WP.BgDeep,
     onBackground = WP.TextPrimary,
     surface = WP.BgMid,
     onSurface = WP.TextPrimary,
     surfaceVariant = WP.BgRaise,
     onSurfaceVariant = WP.TextSecondary,
-    error = WP.Danger,
+    error = WP.Red,
+    onError = WP.TextPrimary,
     outline = WP.GlassBorder,
 )
 

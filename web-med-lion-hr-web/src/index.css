@@ -2,85 +2,286 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Med Lion HR — dark cinematic glassmorphic design system. */
+/* ═══════════════════════════════════════════════════════════
+   Med Lion HR — Premium Blue / White / Green / Red Design System
+   v2.0 — Premium Live Layers Edition
+   Deep navy base, royal blue primary, crisp white text,
+   emerald green success, crimson red danger.
+   ═══════════════════════════════════════════════════════════ */
 
 @layer base {
   :root {
-    --background: 222 60% 4%;
+    /* ── Base ── */
+    --background: 225 60% 3%;
     --foreground: 210 40% 98%;
 
-    --card: 222 50% 8%;
+    /* ── Cards & surfaces ── */
+    --card: 225 50% 7%;
     --card-foreground: 210 40% 98%;
-
-    --popover: 222 50% 7%;
+    --popover: 225 50% 6%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 217 91% 60%;
+    /* ── Primary: Royal Blue ── */
+    --primary: 221 83% 53%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 222 40% 14%;
+    /* ── Secondary: Sky Blue ── */
+    --secondary: 217 40% 14%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 222 30% 16%;
+    /* ── Muted ── */
+    --muted: 220 30% 14%;
     --muted-foreground: 215 20% 65%;
 
-    --accent: 217 91% 60%;
+    /* ── Accent: Emerald Green ── */
+    --accent: 160 84% 39%;
     --accent-foreground: 0 0% 100%;
 
+    /* ── Destructive: Crimson Red ── */
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 217 30% 22%;
-    --input: 217 30% 18%;
-    --ring: 217 91% 60%;
+    /* ── Success: Emerald Green ── */
+    --success: 160 84% 39%;
+    --success-foreground: 0 0% 100%;
 
+    /* ── Warning: Amber ── */
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+
+    /* ── Borders & inputs ── */
+    --border: 220 30% 20%;
+    --input: 220 30% 16%;
+    --ring: 221 83% 53%;
+
+    /* ── Radius ── */
     --radius: 1rem;
   }
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
-
-  html, body, #root {
-    @apply h-full;
-  }
+  * { @apply border-border; }
+  html, body, #root { @apply h-full; }
 
   body {
     @apply text-foreground;
-    background-color: #05070e;
+    background-color: #050810;
+    font-feature-settings: "ss01", "ss02", "cv01";
+    overflow-x: hidden;
+  }
+
+  /* ── Premium live layered background ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+
+    /* Layer 1: Royal Blue — large slow top-left orb */
     background-image:
-      radial-gradient(900px 600px at 12% -5%, hsl(217 91% 50% / 0.20), transparent 60%),
-      radial-gradient(800px 600px at 100% 0%, hsl(0 84% 55% / 0.14), transparent 55%),
-      radial-gradient(1000px 700px at 50% 110%, hsl(217 91% 60% / 0.12), transparent 60%);
+      radial-gradient(900px 600px at 15% -5%, hsl(221 83% 53% / 0.22), transparent 55%),
+
+      /* Layer 2: Emerald Green — mid bottom-right orb */
+      radial-gradient(800px 550px at 85% 80%, hsl(160 84% 39% / 0.16), transparent 50%),
+
+      /* Layer 3: Crimson Red — subtle bottom-left orb */
+      radial-gradient(600px 400px at 8% 85%, hsl(0 84% 60% / 0.09), transparent 55%),
+
+      /* Layer 4: Crisp White — bright highlight top-right */
+      radial-gradient(700px 500px at 75% 15%, hsl(0 0% 100% / 0.06), transparent 55%),
+
+      /* Layer 5: Electric Blue — center-right pulse */
+      radial-gradient(850px 600px at 58% 45%, hsl(224 76% 48% / 0.16), transparent 50%),
+
+      /* Layer 6: Mint Green — subtle top-center */
+      radial-gradient(550px 350px at 48% 5%, hsl(158 64% 52% / 0.07), transparent 55%);
+
     background-attachment: fixed;
-    font-feature-settings: "ss01";
+
+    /* Slow drift animation — 30s full cycle */
+    animation: bgDrift 30s ease-in-out infinite alternate;
+  }
+
+  @keyframes bgDrift {
+    0%   { background-position: 0% 0%, 0% 0%, 0% 0%, 0% 0%, 0% 0%, 0% 0%; }
+    25%  { background-position: 2% -1%, -1% 1%, 1% 0%, -1% -1%, 1% 1%, 0% -1%; }
+    50%  { background-position: -1% 1%, 1% -1%, -1% 1%, 1% 1%, -1% -1%, 1% 1%; }
+    75%  { background-position: 1% 0%, 0% -1%, -1% -1%, 1% 0%, 0% 1%, -1% 0%; }
+    100% { background-position: 0% 1%, 1% 0%, 0% 1%, -1% 0%, 1% 0%, 0% -1%; }
+  }
+
+  /* ── Subtle hex grid overlay ── */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.025;
+    background-image:
+      repeating-linear-gradient(
+        60deg,
+        hsl(221 83% 53% / 0.5) 0px,
+        transparent 1px,
+        transparent 60px
+      ),
+      repeating-linear-gradient(
+        -60deg,
+        hsl(221 83% 53% / 0.5) 0px,
+        transparent 1px,
+        transparent 60px
+      ),
+      repeating-linear-gradient(
+        0deg,
+        hsl(221 83% 53% / 0.3) 0px,
+        transparent 1px,
+        transparent 60px
+      );
+    animation: hexDrift 45s linear infinite;
+  }
+
+  @keyframes hexDrift {
+    0%   { transform: translate(0, 0) rotate(0deg); }
+    100% { transform: translate(-30px, -30px) rotate(5deg); }
   }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   Premium Glass Components
+   ═══════════════════════════════════════════════════════════ */
 
 @layer components {
   .glass {
     @apply rounded-2xl border;
-    background: linear-gradient(160deg, hsl(0 0% 100% / 0.08), hsl(0 0% 100% / 0.02));
-    border-color: hsl(0 0% 100% / 0.12);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-    box-shadow: 0 8px 40px hsl(222 80% 2% / 0.5), inset 0 1px 0 hsl(0 0% 100% / 0.08);
+    background: linear-gradient(
+      170deg,
+      hsl(0 0% 100% / 0.10),
+      hsl(0 0% 100% / 0.03) 40%,
+      hsl(225 60% 5% / 0.20) 100%
+    );
+    border-color: hsl(0 0% 100% / 0.10);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow:
+      0 8px 40px hsl(225 80% 2% / 0.50),
+      inset 0 1px 0 hsl(0 0% 100% / 0.08);
   }
 
   .glass-hover {
     @apply transition-all duration-300;
   }
   .glass-hover:hover {
-    border-color: hsl(217 91% 60% / 0.4);
-    box-shadow: 0 12px 50px hsl(217 91% 40% / 0.18), inset 0 1px 0 hsl(0 0% 100% / 0.12);
+    border-color: hsl(221 83% 53% / 0.40);
+    box-shadow:
+      0 12px 50px hsl(221 83% 40% / 0.18),
+      inset 0 1px 0 hsl(0 0% 100% / 0.12);
   }
 
+  .glass-success {
+    @apply rounded-2xl border;
+    background: linear-gradient(
+      170deg,
+      hsl(160 84% 39% / 0.10),
+      hsl(160 84% 39% / 0.03) 40%,
+      hsl(225 60% 5% / 0.20) 100%
+    );
+    border-color: hsl(160 84% 39% / 0.40);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow:
+      0 8px 40px hsl(225 80% 2% / 0.50),
+      inset 0 1px 0 hsl(160 84% 39% / 0.12);
+  }
+
+  .glass-danger {
+    @apply rounded-2xl border;
+    background: linear-gradient(
+      170deg,
+      hsl(0 84% 60% / 0.10),
+      hsl(0 84% 60% / 0.03) 40%,
+      hsl(225 60% 5% / 0.20) 100%
+    );
+    border-color: hsl(0 84% 60% / 0.40);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow:
+      0 8px 40px hsl(225 80% 2% / 0.50),
+      inset 0 1px 0 hsl(0 84% 60% / 0.12);
+  }
+
+  /* Glow text effects */
   .glow-text {
-    text-shadow: 0 0 24px hsl(217 91% 60% / 0.5);
+    text-shadow: 0 0 24px hsl(221 83% 53% / 0.50);
+  }
+  .glow-text-green {
+    text-shadow: 0 0 20px hsl(160 84% 39% / 0.45);
+  }
+  .glow-text-red {
+    text-shadow: 0 0 20px hsl(0 84% 60% / 0.45);
+  }
+
+  /* Premium button */
+  .btn-premium {
+    @apply rounded-xl font-semibold transition-all duration-300;
+    background: linear-gradient(135deg, hsl(221 83% 53%), hsl(224 76% 48%));
+    box-shadow: 0 4px 20px hsl(221 83% 40% / 0.35);
+  }
+  .btn-premium:hover {
+    box-shadow: 0 6px 30px hsl(221 83% 40% / 0.50);
+    filter: brightness(1.08);
+  }
+  .btn-premium:active {
+    filter: brightness(0.92);
+    transform: scale(0.98);
+  }
+
+  /* Premium success button */
+  .btn-success {
+    @apply rounded-xl font-semibold transition-all duration-300;
+    background: linear-gradient(135deg, hsl(160 84% 39%), hsl(158 64% 35%));
+    box-shadow: 0 4px 20px hsl(160 84% 30% / 0.35);
+  }
+  .btn-success:hover {
+    box-shadow: 0 6px 30px hsl(160 84% 30% / 0.50);
+    filter: brightness(1.08);
+  }
+
+  /* Premium danger button */
+  .btn-danger {
+    @apply rounded-xl font-semibold transition-all duration-300;
+    background: linear-gradient(135deg, hsl(0 84% 60%), hsl(0 72% 51%));
+    box-shadow: 0 4px 20px hsl(0 84% 40% / 0.35);
+  }
+  .btn-danger:hover {
+    box-shadow: 0 6px 30px hsl(0 84% 40% / 0.50);
+    filter: brightness(1.08);
+  }
+
+  /* Status pills */
+  .pill-blue {
+    @apply rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-wider;
+    background: hsl(221 83% 53% / 0.15);
+    border-color: hsl(221 83% 53% / 0.40);
+    color: hsl(221 83% 70%);
+  }
+  .pill-green {
+    @apply rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-wider;
+    background: hsl(160 84% 39% / 0.15);
+    border-color: hsl(160 84% 39% / 0.40);
+    color: hsl(160 84% 60%);
+  }
+  .pill-red {
+    @apply rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-wider;
+    background: hsl(0 84% 60% / 0.15);
+    border-color: hsl(0 84% 60% / 0.40);
+    color: hsl(0 84% 70%);
   }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   Animations
+   ═══════════════════════════════════════════════════════════ */
 
 @layer utilities {
   .animate-fade-up {
@@ -88,13 +289,46 @@
   }
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(16px); }
-    to { opacity: 1; transform: translateY(0); }
+    to   { opacity: 1; transform: translateY(0); }
   }
+
+  .animate-fade-in {
+    animation: fadeIn 0.4s ease both;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.94); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
   .animate-pulse-dot {
     animation: pulseDot 2s ease-in-out infinite;
   }
   @keyframes pulseDot {
-    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 currentColor; }
-    50% { opacity: 0.7; box-shadow: 0 0 0 6px transparent; }
+    0%, 100% { opacity: 1;     box-shadow: 0 0 0 0 currentColor; }
+    50%      { opacity: 0.7;   box-shadow: 0 0 0 8px transparent; }
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50%      { transform: translateY(-8px); }
+  }
+
+  .animate-glow-pulse {
+    animation: glowPulse 3s ease-in-out infinite;
+  }
+  @keyframes glowPulse {
+    0%, 100% { box-shadow: 0 0 20px hsl(221 83% 53% / 0.30); }
+    50%      { box-shadow: 0 0 40px hsl(221 83% 53% / 0.50); }
   }
 }
