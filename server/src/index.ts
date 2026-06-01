@@ -1,5 +1,7 @@
 import express from "express";
 import cors from "cors";
+import path from "path";
+import fs from "fs";
 import { loadData, getData, setData, generateId, saveData } from "./store.js";
 import type {
   Employee, AttendanceLog, LeaveRequest, SalaryBreakdown,
@@ -84,8 +86,33 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ── Serve web dashboard static files (built web app) ──
-app.use(express.static("web-dist"));
+// ── Root route ──
+app.get("/", (_req, res) => {
+  res.json({
+    name: "Med Lion HR Server",
+    version: "1.0.0",
+    status: "running",
+    endpoints: {
+      health: "/api/health",
+      login: "POST /api/admin/login",
+      employees: "GET|POST /api/employees",
+      attendance: "GET|POST /api/attendance",
+      leaves: "GET|POST /api/leaves",
+      salary: "GET /api/salary/:employeeId",
+      export: "GET /api/export/:type/:month/:year",
+    },
+  });
+});
+
+// ── Serve web dashboard static files (if built) ──
+const webDistPath = path.join(__dirname, "..", "web-dist");
+if (fs.existsSync(webDistPath)) {
+  app.use(express.static(webDistPath));
+  // SPA fallback: serve index.html for any unmatched route
+  app.get("*", (_req, res) => {
+    res.sendFile(path.join(webDistPath, "index.html"));
+  });
+}
 
 // ── Health check ──
 app.get("/api/health", (_req, res) => {
