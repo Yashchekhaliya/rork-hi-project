@@ -96,7 +96,7 @@ const Login = ({ onLogin }: { onLogin: () => void }) => {
         </form>
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
-          Cloud-synced · enter your admin credentials
+          Cloud-synced via Supabase · enter your admin credentials
         </p>
       </div>
     </div>
