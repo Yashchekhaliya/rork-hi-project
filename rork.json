@@ -1,4 +1,5 @@
 {
+  "$schema": "https://rork.com/schema/rork.json",
   "apps": [
     {
       "name": "Med Lion HR",
@@ -9,7 +10,16 @@
       "name": "Med Lion HR Web",
       "path": "web-med-lion-hr-web",
       "framework": "web"
+    },
+    {
+      "name": "Functions",
+      "path": "functions",
+      "framework": "cloudflare"
+    },
+    {
+      "name": "Backend",
+      "path": "backend",
+      "framework": "supabase"
     }
-  ],
-  "$schema": "https://rork.com/schema/rork.json"
+  ]
 }

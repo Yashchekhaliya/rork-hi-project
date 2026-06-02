@@ -51,10 +51,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.rork.workpulse.data.ConnectionStatus
+
 import com.rork.workpulse.data.CsvExporter
 import com.rork.workpulse.data.Format
-import com.rork.workpulse.data.ServerSync
+
 import com.rork.workpulse.data.WorkPulseRepository
 import com.rork.workpulse.ui.components.GlassPanel
 import com.rork.workpulse.ui.theme.WP
@@ -417,24 +417,8 @@ fun AdminSettingsScreen(
 
 @Composable
 private fun ServerConfigCard() {
-    val context = LocalContext.current
-    val haptics = LocalHapticFeedback.current
-    val status by ServerSync.status.collectAsState()
-    val savedUrl by ServerSync.serverUrl.collectAsState()
-    var expanded by remember { mutableStateOf(false) }
-    var address by remember { mutableStateOf(savedUrl?.removePrefix("http://")?.removePrefix("https://") ?: "") }
-
-    val (dotColor, statusLabel) = when (status) {
-        ConnectionStatus.CONNECTED -> WP.Lime to "Connected"
-        ConnectionStatus.CONNECTING -> WP.Amber to "Connecting…"
-        ConnectionStatus.OFFLINE -> WP.TextDim to "Offline · local mode"
-    }
-
     GlassPanel(
-        modifier = Modifier.fillMaxWidth().clickable {
-            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-            expanded = !expanded
-        },
+        modifier = Modifier.fillMaxWidth(),
         cornerRadius = 18.dp,
         contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
     ) {
@@ -446,54 +430,11 @@ private fun ServerConfigCard() {
             ) { Icon(Icons.Filled.Dns, null, tint = WP.Cyan, modifier = Modifier.size(20.dp)) }
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
-                Text("PC server connection", color = WP.TextPrimary, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                Text("Cloud backend", color = WP.TextPrimary, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(Modifier.size(8.dp).clip(CircleShape).glass(cornerRadius = 8.dp, fillTop = dotColor, fillBottom = dotColor))
+                    Box(Modifier.size(8.dp).clip(CircleShape).glass(cornerRadius = 8.dp, fillTop = WP.Lime, fillBottom = WP.Lime))
                     Spacer(Modifier.width(6.dp))
-                    Text(statusLabel, color = dotColor, fontSize = 12.sp, fontWeight = FontWeight.Medium)
-                }
-            }
-            Icon(Icons.Filled.Edit, null, tint = WP.TextSecondary, modifier = Modifier.size(18.dp))
-        }
-
-        AnimatedVisibility(visible = expanded) {
-            Column {
-                Spacer(Modifier.height(14.dp))
-                Box(Modifier.fillMaxWidth().height(1.dp).glass(cornerRadius = 1.dp))
-                Spacer(Modifier.height(14.dp))
-                Text(
-                    "Enter your PC's local IP and port. Run the server with \"bun start\" in the server folder, then use the address it prints (e.g. 192.168.1.20:8080).",
-                    color = WP.TextDim, fontSize = 12.sp,
-                )
-                Spacer(Modifier.height(12.dp))
-                ConfigField("Server address (IP:port)", address) { address = it }
-                Spacer(Modifier.height(12.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .glass(cornerRadius = 14.dp, fillTop = WP.Cyan.copy(alpha = 0.3f), fillBottom = WP.Cyan.copy(alpha = 0.08f), borderColor = WP.Cyan.copy(alpha = 0.6f))
-                            .clickable {
-                                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                                ServerSync.setServer(address)
-                                toast(context, "Connecting to $address…")
-                                expanded = false
-                            }
-                            .padding(vertical = 14.dp),
-                        contentAlignment = Alignment.Center,
-                    ) { Text("Connect", color = WP.Cyan, fontWeight = FontWeight.Bold, fontSize = 15.sp) }
-                    Box(
-                        modifier = Modifier
-                            .glass(cornerRadius = 14.dp, fillTop = WP.Danger.copy(alpha = 0.18f), fillBottom = WP.Danger.copy(alpha = 0.04f), borderColor = WP.Danger.copy(alpha = 0.4f))
-                            .clickable {
-                                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                                ServerSync.disconnect()
-                                address = ""
-                                toast(context, "Disconnected — local mode")
-                            }
-                            .padding(horizontal = 16.dp, vertical = 14.dp),
-                        contentAlignment = Alignment.Center,
-                    ) { Text("Disconnect", color = WP.Danger, fontWeight = FontWeight.Bold, fontSize = 15.sp) }
+                    Text("Supabase + Cloudflare", color = WP.Lime, fontSize = 12.sp, fontWeight = FontWeight.Medium)
                 }
             }
         }

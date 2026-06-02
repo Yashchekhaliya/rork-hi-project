@@ -1,12 +1,4 @@
-#!/usr/bin/env node
-import { spawnSync } from "node:child_process";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const vitePath = path.join(__dirname, "node_modules", "vite", "bin", "vite.js");
-const result = spawnSync(process.execPath, [vitePath, ...process.argv.slice(2)], {
-  cwd: __dirname,
-  stdio: "inherit",
-});
-process.exit(result.status ?? 1);
+#!/bin/sh
+# Wrapper that invokes vite from node_modules.
+# Used by "bun run build" when vite is not on PATH.
+exec node "$(dirname "$0")/node_modules/vite/bin/vite.js" "$@"

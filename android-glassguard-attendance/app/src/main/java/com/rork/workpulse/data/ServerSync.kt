@@ -12,61 +12,34 @@ import kotlinx.coroutines.launch
 
 enum class ConnectionStatus { OFFLINE, CONNECTING, CONNECTED }
 
+/** Cloud Worker API URL — persistent cloud backend, no local server needed. */
+private const val CLOUD_API_URL = "https://li980wrgnunptwig2nzqh-backend.rork.app"
+
 /**
- * Bridges the in-app [WorkPulseRepository] with the Med Lion HR local server.
+ * Bridges the in-app [WorkPulseRepository] with the Med Lion HR cloud backend.
  *
- * - Persists the server base URL (e.g. http://192.168.1.20:8080) in SharedPreferences.
- * - On [start], pings the server every few seconds. When reachable, pulls the latest
- *   snapshot into the repository so the phone mirrors the PC (and the web dashboard).
- * - Local mutations are pushed to the server via [WorkPulseRepository.SyncHook]; when the
- *   server is offline everything still works locally and re-syncs once it returns.
+ * - Connects automatically to the Cloudflare Worker (no manual IP config needed).
+ * - Pings the server every few seconds. When reachable, pulls the latest snapshot.
+ * - Local mutations are pushed to the server; when offline everything works locally.
  */
 object ServerSync : WorkPulseRepository.SyncHook {
 
-    private const val PREFS = "med_lion_hr_sync"
-    private const val KEY_URL = "server_url"
-
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    private val _status = MutableStateFlow(ConnectionStatus.OFFLINE)
+    private val _status = MutableStateFlow(ConnectionStatus.CONNECTING)
     val status: StateFlow<ConnectionStatus> = _status.asStateFlow()
 
-    private val _serverUrl = MutableStateFlow<String?>(null)
-    val serverUrl: StateFlow<String?> = _serverUrl.asStateFlow()
-
-    private var prefs: android.content.SharedPreferences? = null
     @Volatile private var client: ServerClient? = null
 
     fun init(context: Context) {
-        prefs = context.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-        _serverUrl.value = prefs?.getString(KEY_URL, null)
         rebuildClient()
         WorkPulseRepository.syncHook = this
         startPingLoop()
     }
 
-    /** Normalises and persists a host/port the admin enters. */
-    fun setServer(raw: String) {
-        val trimmed = raw.trim().trimEnd('/')
-        val normalised = when {
-            trimmed.isEmpty() -> null
-            trimmed.startsWith("http://") || trimmed.startsWith("https://") -> trimmed
-            else -> "http://$trimmed"
-        }
-        _serverUrl.value = normalised
-        prefs?.edit()?.apply {
-            if (normalised == null) remove(KEY_URL) else putString(KEY_URL, normalised)
-            apply()
-        }
-        rebuildClient()
-        if (normalised == null) _status.value = ConnectionStatus.OFFLINE
-    }
-
-    fun disconnect() = setServer("")
-
     private fun rebuildClient() {
         client?.close()
-        client = _serverUrl.value?.let { ServerClient(it) }
+        client = ServerClient(CLOUD_API_URL)
     }
 
     private fun startPingLoop() {

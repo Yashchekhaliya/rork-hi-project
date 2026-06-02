@@ -1,42 +1,33 @@
-# Convert Web Dashboard to Windows Electron App
+# Migrate Med Lion HR from local Express server to Supabase + Cloudflare
 
 ## What Will Change
 
-The current web dashboard (which runs in a browser) will be converted into a standalone Windows desktop application.
+The local Bun/Express server that runs on your PC will be replaced with a cloud backend powered by Supabase (database) and a Cloudflare Worker (API). No more local server — everything runs in the cloud.
 
 ## Features
-- [x] Same admin dashboard UI — login, live workforce view, leave approvals, payroll, employee management
-- [x] Runs as a native Windows window with its own icon, title bar, and taskbar entry
-- [x] Connects to the same local server as the Android app
-- [x] System tray support for quick access
-- [x] Window remembers its size and position between launches
-- [x] Production EXE installer (NSIS) + portable EXE via electron-builder
-- [x] API client auto-detects dev vs production and uses correct server URL
 
-## Design
-- [x] All existing dark glassmorphic styling stays the same
-- [x] Proper Windows window chrome replacing the browser tab
-- [x] App icon in the taskbar and start menu
+- All employee, attendance, leave, payroll, and worksite data stored in a live Supabase Postgres database
+- Same API endpoints as before, but served from a Cloudflare Worker at a permanent cloud URL
+- Both the Windows app and Android app connect directly to the cloud — no local server needed
+- Admin password and employee credentials stored securely in the database
+- Data persists even if your PC is off
 
-## Implementation Details
-- [x] Added Electron + electron-builder dependencies
-- [x] Created `electron/main.cjs` — main process with window management, tray, IPC
-- [x] Created `electron/preload.cjs` — secure context bridge
-- [x] Updated `vite.config.ts` — base path + port fix
-- [x] Updated `package.json` — main entry, scripts, electron-builder config
-- [x] Fixed `api.ts` — production Electron uses `http://localhost:8080` as API base
-- [x] Created `build.bat` — one-click Windows build script
-- [x] Build validated
+## How It Works
 
-## How to Build the Windows EXE
-1. Open a terminal in `web-med-lion-hr-web`
-2. Run: `build.bat`
-3. Find the installer in: `release\Med Lion HR Setup x.x.x.exe`
+1. Supabase Postgres stores all your HR data (employees, attendance logs, leave requests, payroll)
+2. A Cloudflare Worker acts as the API — it handles login, geofence checks, salary calculations, CSV exports, and talks to Supabase
+3. The Windows desktop app and Android app both connect to the Worker's cloud URL instead of `localhost:8080`
 
-## How to Run
-1. Start the server: `cd server && bun run src/index.ts`
-2. Start the Electron dev app: `cd web-med-lion-hr-web && bun run electron:dev`
-3. Or build for production: `bun run electron:build`
+## What Stays the Same
 
-## What Happens to the Web App
-The existing web dashboard has been converted to an Electron desktop app. The server remains unchanged — both the Android app and the Windows app connect to it the same way.
+- All existing screens and features work exactly as before
+- The premium blue/white/green/red design is unchanged
+- Admin login flow is identical
+- The Electron Windows EXE build still works
+
+## What Gets Removed
+
+- The local `server/` folder (Express + JSON file storage) — no longer needed
+- The localStorage fallback in the web app — replaced by real cloud database
+- The Android app's server IP configuration — replaced by cloud URL
+

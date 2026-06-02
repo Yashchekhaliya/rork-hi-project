@@ -1,26 +1,10 @@
 /**
- * API client for the Med Lion HR local server.
- * Falls back to localStorage when the Express server isn't running (e.g. in Rork's preview).
+ * API client for the Med Lion HR cloud backend.
+ * All data is stored in Supabase Postgres, served via Cloudflare Worker.
  */
 
-import { localStore } from "./localStore";
-
-declare global {
-  interface Window {
-    electronAPI?: {
-      isElectron: boolean;
-      platform: string;
-      showSaveDialog: (options?: Record<string, unknown>) => Promise<string | null>;
-      getUserDataPath: () => Promise<string>;
-    };
-  }
-}
-
-/** API base URL — uses Vite proxy in dev, direct localhost in production Electron. */
-const API_BASE: string =
-  !import.meta.env.DEV && window.electronAPI?.isElectron
-    ? "http://localhost:8080"
-    : "";
+/** Cloud Worker API base URL — persistent cloud backend, no local server needed. */
+const API_BASE: string = "https://li980wrgnunptwig2nzqh-backend.rork.app";
 
 export interface GeoPoint {
   latitude: number;
@@ -98,18 +82,7 @@ export interface YearlySummary {
   totalNet: number;
 }
 
-function isNetworkError(err: unknown): boolean {
-  const msg = err instanceof Error ? err.message : String(err);
-  return (
-    msg.includes("fetch failed") ||
-    msg.includes("NetworkError") ||
-    msg.includes("Failed to fetch") ||
-    msg.includes("404") ||
-    msg.includes("500")
-  );
-}
-
-async function tryServer<T>(path: string, options?: RequestInit): Promise<T> {
+async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}/api${path}`, {
     headers: { "Content-Type": "application/json" },
     ...options,
@@ -121,117 +94,71 @@ async function tryServer<T>(path: string, options?: RequestInit): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-/** Try the server first; on network/404 errors, fall back to localStorage. */
-async function withFallback<T>(serverCall: () => Promise<T>, localCall: () => T): Promise<T> {
-  try {
-    return await serverCall();
-  } catch (err) {
-    if (isNetworkError(err)) return localCall();
-    throw err;
-  }
-}
-
 export const api = {
   health: () => tryServer<{ ok: boolean; name: string }>("/health"),
 
   adminLogin: (password: string) =>
-    withFallback(
-      () => tryServer<{ ok: boolean; token: string }>("/admin/login", {
-        method: "POST",
-        body: JSON.stringify({ password }),
-      }),
-      () => localStore.adminLogin(password),
-    ),
+    request<{ ok: boolean; token: string }>("/admin/login", {
+      method: "POST",
+      body: JSON.stringify({ password }),
+    }),
 
   changeAdminPassword: (password: string) =>
-    withFallback(
-      () => tryServer<{ ok: boolean }>("/admin/change-password", {
-        method: "POST",
-        body: JSON.stringify({ password }),
-      }),
-      () => localStore.changeAdminPassword(password),
-    ),
+    request<{ ok: boolean }>("/admin/change-password", {
+      method: "POST",
+      body: JSON.stringify({ password }),
+    }),
 
   employees: () =>
-    withFallback(
-      () => tryServer<Employee[]>("/employees"),
-      () => localStore.employees(),
-    ),
+    request<Employee[]>("/employees"),
 
   createEmployee: (data: { employeeId: string; password: string; name: string; role: string; baseSalary: number }) =>
-    withFallback(
-      () => tryServer<{ ok: boolean; employee: Employee }>("/employees", {
-        method: "POST",
-        body: JSON.stringify(data),
-      }),
-      () => localStore.createEmployee(data),
-    ),
+    request<{ ok: boolean; employee: Employee }>("/employees", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
 
   deleteEmployee: (id: string) =>
-    withFallback(
-      () => tryServer<{ ok: boolean }>(`/employees/${id}`, { method: "DELETE" }),
-      () => localStore.deleteEmployee(id),
-    ),
+    request<{ ok: boolean }>(`/employees/${id}`, { method: "DELETE" }),
 
   attendance: (employeeId?: string, month?: number, year?: number) => {
-    const serverCall = async () => {
-      const params = new URLSearchParams();
-      if (employeeId) params.set("employeeId", employeeId);
-      if (month !== undefined) params.set("month", String(month));
-      if (year !== undefined) params.set("year", String(year));
-      const q = params.toString();
-      return tryServer<AttendanceLog[]>(`/attendance${q ? `?${q}` : ""}`);
-    };
-    return withFallback(serverCall, () => localStore.attendance(employeeId, month, year));
+    const params = new URLSearchParams();
+    if (employeeId) params.set("employeeId", employeeId);
+    if (month !== undefined) params.set("month", String(month));
+    if (year !== undefined) params.set("year", String(year));
+    const q = params.toString();
+    return request<AttendanceLog[]>(`/attendance${q ? `?${q}` : ""}`);
   },
 
   updateAttendance: (id: string, checkInMillis: number, checkOutMillis: number | null) =>
-    tryServer<{ ok: boolean }>(`/attendance/${id}`, {
+    request<{ ok: boolean }>(`/attendance/${id}`, {
       method: "PUT",
       body: JSON.stringify({ checkInMillis, checkOutMillis }),
     }),
 
   leaves: () =>
-    withFallback(
-      () => tryServer<LeaveRequest[]>("/leaves"),
-      () => localStore.leaves(),
-    ),
+    request<LeaveRequest[]>("/leaves"),
 
   decideLeave: (id: string, status: LeaveStatus, payType: LeavePayType | null) =>
-    withFallback(
-      () => tryServer<{ ok: boolean }>(`/leaves/${id}`, {
-        method: "PUT",
-        body: JSON.stringify({ status, payType }),
-      }),
-      () => localStore.decideLeave(id, status, payType),
-    ),
+    request<{ ok: boolean }>(`/leaves/${id}`, {
+      method: "PUT",
+      body: JSON.stringify({ status, payType }),
+    }),
 
   salaries: (month: number, year: number) =>
-    withFallback(
-      () => tryServer<SalaryBreakdown[]>(`/salaries/${month}/${year}`),
-      () => localStore.salaries(month, year),
-    ),
+    request<SalaryBreakdown[]>(`/salaries/${month}/${year}`),
 
   summaries: (year: number) =>
-    withFallback(
-      () => tryServer<YearlySummary[]>(`/summaries/${year}`),
-      () => localStore.summaries(year),
-    ),
+    request<YearlySummary[]>(`/summaries/${year}`),
 
   worksite: () =>
-    withFallback(
-      () => tryServer<WorkSite>("/worksite"),
-      () => localStore.worksite(),
-    ),
+    request<WorkSite>("/worksite"),
 
   updateWorksite: (data: { name: string; lat: number; lon: number; radius: number }) =>
-    withFallback(
-      () => tryServer<{ ok: boolean; workSite: WorkSite }>("/worksite", {
-        method: "PUT",
-        body: JSON.stringify(data),
-      }),
-      () => localStore.updateWorksite(data),
-    ),
+    request<{ ok: boolean; workSite: WorkSite }>("/worksite", {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
 };
 
 export function formatMoney(value: number): string {
