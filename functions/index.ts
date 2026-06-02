@@ -1,9 +1,9 @@
 /**
  * Med Lion HR — Cloudflare Worker API
  *
- * Replaces the old Bun/Express server. All endpoints are backed by the user's
- * own Supabase Postgres project. The Worker handles auth (admin/employee
- * password verification), geofence checks, salary computation, and CSV export.
+ * All endpoints are backed by Supabase Postgres. The Worker handles auth
+ * (admin userId+password, employee password verification), geofence checks,
+ * salary computation, and CSV export.
  *
  * Reachable at: https://li980wrgnunptwig2nzqh-backend.rork.app/<path>
  */
@@ -284,13 +284,18 @@ export default {
 
       // ── Admin Auth ──
       if (p === "/api/admin/login" && m === "POST") {
-        const { password } = await request.json() as { password: string };
-        const { data, error: dbErr } = await supabase.from("admin_settings").select("value").eq("key", "admin_password").maybeSingle();
-        if (dbErr) return err(`Database error: ${dbErr.message}`, 500);
-        if (data && data.value === password) {
-          return ok({ ok: true, token: "admin-session" });
-        }
-        return err("Invalid password", 401);
+        const { userId, password } = await request.json() as { userId: string; password: string };
+        if (!userId || !password) return err("User ID and password are required");
+
+        const { data: uidRow, error: uidErr } = await supabase.from("admin_settings").select("value").eq("key", "admin_user_id").maybeSingle();
+        if (uidErr) return err(`Database error: ${uidErr.message}`, 500);
+        if (!uidRow || uidRow.value !== userId) return err("Invalid credentials", 401);
+
+        const { data: pwdRow, error: pwdErr } = await supabase.from("admin_settings").select("value").eq("key", "admin_password").maybeSingle();
+        if (pwdErr) return err(`Database error: ${pwdErr.message}`, 500);
+        if (!pwdRow || pwdRow.value !== password) return err("Invalid credentials", 401);
+
+        return ok({ ok: true, token: "admin-session" });
       }
 
       if (p === "/api/admin/change-password" && m === "POST") {
@@ -687,7 +692,15 @@ export default {
           results.push("leave_requests: exists");
         }
 
-        // Seed admin password if missing
+        // Seed admin credentials if missing
+        const { data: existingUid } = await supabase.from("admin_settings").select("value").eq("key", "admin_user_id").maybeSingle();
+        if (!existingUid) {
+          await supabase.from("admin_settings").upsert({ key: "admin_user_id", value: "admin" }, { onConflict: "key" });
+          results.push("admin_user_id: seeded");
+        } else {
+          results.push("admin_user_id: exists");
+        }
+
         const { data: existingPwd } = await supabase.from("admin_settings").select("value").eq("key", "admin_password").maybeSingle();
         if (!existingPwd) {
           await supabase.from("admin_settings").upsert({ key: "admin_password", value: "Yashwant@2000" }, { onConflict: "key" });

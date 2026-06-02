@@ -1,22 +1,24 @@
 import { useState } from "react";
-import { Lock, ShieldCheck } from "lucide-react";
+import { Lock, ShieldCheck, User } from "lucide-react";
 import { toast } from "sonner";
 
 import { api } from "@/lib/api";
 
-/*** Default admin password — also used as client-side fallback when the server is unreachable. */
+/*** Default admin credentials — also used as client-side fallback when the server is unreachable. */
+const DEFAULT_ADMIN_USER_ID = "admin";
 const DEFAULT_ADMIN_PASSWORD = "Yashwant@2000";
 
 const Login = ({ onLogin }: { onLogin: () => void }) => {
+  const [userId, setUserId] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!password) return;
+    if (!userId || !password) return;
     setLoading(true);
     try {
-      await api.adminLogin(password);
+      await api.adminLogin(userId, password);
       toast.success("Welcome back, admin");
       onLogin();
     } catch (err) {
@@ -28,11 +30,11 @@ const Login = ({ onLogin }: { onLogin: () => void }) => {
         message.includes("404") ||
         message.includes("500");
 
-      if (isNetworkError && password === DEFAULT_ADMIN_PASSWORD) {
+      if (isNetworkError && userId === DEFAULT_ADMIN_USER_ID && password === DEFAULT_ADMIN_PASSWORD) {
         toast.success("Welcome back, admin (offline mode)");
         onLogin();
       } else if (isNetworkError) {
-        toast.error("Server unreachable — check that the Med Lion server is running, or use the default password for offline access.");
+        toast.error("Server unreachable — check that the Med Lion server is running, or use the default credentials for offline access.");
       } else {
         toast.error(message);
       }
@@ -64,13 +66,23 @@ const Login = ({ onLogin }: { onLogin: () => void }) => {
 
         <form onSubmit={submit} className="space-y-4">
           <div className="relative">
+            <User className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="text"
+              value={userId}
+              onChange={(e) => setUserId(e.target.value)}
+              placeholder="Admin user ID"
+              autoFocus
+              className="glass w-full rounded-xl py-3.5 pl-11 pr-4 text-sm outline-none placeholder:text-muted-foreground focus:border-primary/50 transition-all duration-300"
+            />
+          </div>
+          <div className="relative">
             <Lock className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Admin password"
-              autoFocus
               className="glass w-full rounded-xl py-3.5 pl-11 pr-4 text-sm outline-none placeholder:text-muted-foreground focus:border-primary/50 transition-all duration-300"
             />
           </div>
@@ -84,7 +96,7 @@ const Login = ({ onLogin }: { onLogin: () => void }) => {
         </form>
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
-          Local network access · same password as the Android admin panel
+          Cloud-synced · enter your admin credentials
         </p>
       </div>
     </div>

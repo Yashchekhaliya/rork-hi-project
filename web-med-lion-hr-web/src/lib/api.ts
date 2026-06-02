@@ -97,10 +97,10 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 export const api = {
   health: () => tryServer<{ ok: boolean; name: string }>("/health"),
 
-  adminLogin: (password: string) =>
+  adminLogin: (userId: string, password: string) =>
     request<{ ok: boolean; token: string }>("/admin/login", {
       method: "POST",
-      body: JSON.stringify({ password }),
+      body: JSON.stringify({ userId, password }),
     }),
 
   changeAdminPassword: (password: string) =>

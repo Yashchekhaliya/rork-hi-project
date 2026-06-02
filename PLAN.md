@@ -1,49 +1,44 @@
-# ✅ Migrate Med Lion HR from local Express server to Supabase + Cloudflare — COMPLETE
+# Med Lion HR — Supabase + Cloudflare Backend
 
 ## What Changed
 
-The local Bun/Express server has been replaced with a cloud backend powered by Supabase (database) and a Cloudflare Worker (API). No more local server — everything runs in the cloud.
+The local Bun/Express server and Windows desktop app have been removed. The backend runs entirely in the cloud via Supabase + Cloudflare Worker. Only the **Android app** and **web dashboard** remain.
 
-## Features — All Complete ✅
+## Features — Complete
 
-- [x] All employee, attendance, leave, payroll, and worksite data stored in a live Supabase Postgres database
-- [x] Same API endpoints as before, but served from a Cloudflare Worker at a permanent cloud URL
-- [x] Both the Windows app and Android app connect directly to the cloud — no local server needed
-- [x] Admin password and employee credentials stored securely in the database
-- [x] Data persists even if your PC is off
+- [x] All data stored in Supabase Postgres
+- [x] Cloudflare Worker API at `https://li980wrgnunptwig2nzqh-backend.rork.app`
+- [x] Admin login requires **userId + password** (not just password)
+- [x] Android app connects to cloud Worker
+- [x] Web dashboard with premium blue/white/green/red UI
+- [ ] Deploy website to Cloudflare Pages with your own account
 
 ## How It Works
 
-1. **Supabase Postgres** stores all your HR data (employees, attendance logs, leave requests, payroll)
-2. **Cloudflare Worker** (`https://li980wrgnunptwig2nzqh-backend.rork.app`) acts as the API — handles login, geofence checks, salary calculations, CSV exports, and talks to Supabase
-3. The Windows desktop app and Android app both connect to the Worker's cloud URL instead of `localhost:8080`
+1. **Supabase Postgres**: employees, attendance_logs, leave_requests, admin_settings, work_site
+2. **Cloudflare Worker**: handles auth (userId+password), geofence checks, salary, CSV export
+3. **Android app**: connects directly to Worker URL
+4. **Web dashboard**: connects directly to Worker URL
 
-## Verified Endpoints
+## Admin Credentials
 
-- [x] `GET /api/health` — live
-- [x] `POST /api/admin/login` — admin auth with password
-- [x] `GET /api/employees` — list all employees (7 seeded)
-- [x] `POST /api/employees` — create employee
-- [x] `GET /api/attendance` — attendance logs
-- [x] `GET /api/leaves` — leave requests
-- [x] `GET /api/worksite` — geofence config
-- [x] `PUT /api/worksite` — update worksite
-- [x] `POST /api/admin/change-password` — change admin password
+- **User ID**: `admin`
+- **Password**: `Yashwant@2000`
 
-## Build Status
+## API Endpoints
 
-- [x] Android — builds clean
-- [x] Web/Windows — builds clean, live at `https://p-li980wrgnunptwig2nzqh.rork.live`
-- [x] Cloudflare Worker — deployed and running
+- `GET /api/health`
+- `POST /api/admin/login` — `{ userId, password }`
+- `GET /api/employees` / `POST /api/employees`
+- `GET /api/attendance` / `POST /api/attendance/checkin` / `POST /api/attendance/checkout`
+- `GET /api/leaves` / `POST /api/leaves`
+- `GET /api/salaries/:month/:year`
+- `GET /api/worksite` / `PUT /api/worksite`
+- `GET /api/export/payroll/:month/:year`
+- `POST /api/setup` — auto-creates tables and seeds credentials
 
-## Credentials
+## What's Removed
 
-- **Admin password**: `Yashwant@2000`
-- **API URL**: `https://li980wrgnunptwig2nzqh-backend.rork.app`
-- **Database**: Supabase Postgres (all 5 tables provisioned with RLS)
-
-## What's No Longer Needed
-
-- ~~The local `server/` folder (Express + JSON file storage)~~
-- ~~The localStorage fallback in the web app~~
-- ~~The Android app's server IP configuration~~
+- Windows Electron desktop app
+- Local Express server (`server/`)
+- Server IP configuration from Android app
