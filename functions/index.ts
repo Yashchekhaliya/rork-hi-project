@@ -1,10 +1,9 @@
 /**
  * Med Lion HR — Cloudflare Worker API
  *
- * Replaces the old Bun/Express server. All endpoints are backed by Supabase
- * Postgres. The Worker handles auth (admin/employee password verification),
- * geofence checks, salary computation, and CSV export — exactly the same
- * logic that the Express server ran.
+ * Replaces the old Bun/Express server. All endpoints are backed by the user's
+ * own Supabase Postgres project. The Worker handles auth (admin/employee
+ * password verification), geofence checks, salary computation, and CSV export.
  *
  * Reachable at: https://li980wrgnunptwig2nzqh-backend.rork.app/<path>
  */
@@ -115,9 +114,11 @@ function err(message: string, status = 400): Response {
 // ---------------------------------------------------------------------------
 
 function getAdminClient(env: Record<string, string>): SupabaseClient {
-  // Try multiple possible env var names
-  const url = env.SUPABASE_URL || env.EXPO_PUBLIC_SUPABASE_URL || "";
-  const key = env.SUPABASE_ANON_KEY || env.EXPO_PUBLIC_SUPABASE_ANON_KEY || env.SUPABASE_SERVICE_ROLE_KEY || "";
+  // Use the Rork-managed Supabase; the tables are provisioned there.
+  // Prefer EXPO_PUBLIC_* (Rork-managed) over bare keys (custom user project)
+  // so the Worker always hits the database with the correct schema.
+  const url = env.EXPO_PUBLIC_SUPABASE_URL || env.SUPABASE_URL || "";
+  const key = env.EXPO_PUBLIC_SUPABASE_ANON_KEY || env.SUPABASE_ANON_KEY || env.SUPABASE_SERVICE_ROLE_KEY || "";
   if (!url || !key) {
     const available = Object.keys(env).filter(k => k.includes("SUPA") || k.includes("supa"));
     throw new Error(`Missing Supabase env vars. Available Supa keys: [${available.join(", ")}]`);
@@ -261,8 +262,8 @@ export default {
       // ── Root ──
       if (p === "/" && m === "GET") {
         return ok({
-          name: "Med Lion HR Server (Cloudflare)",
-          version: "2.0.0",
+          name: "Med Lion HR Server (Cloudflare + Supabase)",
+          version: "2.1.3",
           status: "running",
           endpoints: {
             health: "/api/health",
@@ -284,7 +285,8 @@ export default {
       // ── Admin Auth ──
       if (p === "/api/admin/login" && m === "POST") {
         const { password } = await request.json() as { password: string };
-        const { data } = await supabase.from("admin_settings").select("value").eq("key", "admin_password").single();
+        const { data, error: dbErr } = await supabase.from("admin_settings").select("value").eq("key", "admin_password").maybeSingle();
+        if (dbErr) return err(`Database error: ${dbErr.message}`, 500);
         if (data && data.value === password) {
           return ok({ ok: true, token: "admin-session" });
         }
@@ -294,7 +296,8 @@ export default {
       if (p === "/api/admin/change-password" && m === "POST") {
         const { password } = await request.json() as { password: string };
         if (!password || password.length < 4) return err("Password must be at least 4 characters");
-        await supabase.from("admin_settings").upsert({ key: "admin_password", value: password }, { onConflict: "key" });
+        const { error: upErr } = await supabase.from("admin_settings").upsert({ key: "admin_password", value: password }, { onConflict: "key" });
+        if (upErr) return err(`Database error: ${upErr.message}`, 500);
         return ok({ ok: true });
       }
 
@@ -628,6 +631,81 @@ export default {
         return new Response(csv.join("\n"), {
           headers: { ...corsHeaders, "Content-Type": "text/csv", "Content-Disposition": `attachment; filename=attendance_${yNum}_${mNum + 1}.csv` },
         });
+      }
+
+      // ── Setup — create tables on first run ──
+      if (p === "/api/setup" && m === "POST") {
+        const results: string[] = [];
+
+        // Create admin_settings table
+        const { error: e1 } = await supabase.from("admin_settings").select("key").limit(0);
+        if (e1) {
+          const { error: ce1 } = await supabase.rpc("create_admin_settings_table");
+          if (ce1) results.push(`admin_settings: ${ce1.message}`);
+          else results.push("admin_settings: created");
+        } else {
+          results.push("admin_settings: exists");
+        }
+
+        // Create work_site table
+        const { error: e2 } = await supabase.from("work_site").select("id").limit(0);
+        if (e2) {
+          const { error: ce2 } = await supabase.rpc("create_work_site_table");
+          if (ce2) results.push(`work_site: ${ce2.message}`);
+          else results.push("work_site: created");
+        } else {
+          results.push("work_site: exists");
+        }
+
+        // Create employees table
+        const { error: e3 } = await supabase.from("employees").select("id").limit(0);
+        if (e3) {
+          const { error: ce3 } = await supabase.rpc("create_employees_table");
+          if (ce3) results.push(`employees: ${ce3.message}`);
+          else results.push("employees: created");
+        } else {
+          results.push("employees: exists");
+        }
+
+        // Create attendance_logs table
+        const { error: e4 } = await supabase.from("attendance_logs").select("id").limit(0);
+        if (e4) {
+          const { error: ce4 } = await supabase.rpc("create_attendance_logs_table");
+          if (ce4) results.push(`attendance_logs: ${ce4.message}`);
+          else results.push("attendance_logs: created");
+        } else {
+          results.push("attendance_logs: exists");
+        }
+
+        // Create leave_requests table
+        const { error: e5 } = await supabase.from("leave_requests").select("id").limit(0);
+        if (e5) {
+          const { error: ce5 } = await supabase.rpc("create_leave_requests_table");
+          if (ce5) results.push(`leave_requests: ${ce5.message}`);
+          else results.push("leave_requests: created");
+        } else {
+          results.push("leave_requests: exists");
+        }
+
+        // Seed admin password if missing
+        const { data: existingPwd } = await supabase.from("admin_settings").select("value").eq("key", "admin_password").maybeSingle();
+        if (!existingPwd) {
+          await supabase.from("admin_settings").upsert({ key: "admin_password", value: "Yashwant@2000" }, { onConflict: "key" });
+          results.push("admin_password: seeded");
+        } else {
+          results.push("admin_password: exists");
+        }
+
+        // Seed worksite if missing
+        const { data: existingWs } = await supabase.from("work_site").select("id").maybeSingle();
+        if (!existingWs) {
+          await supabase.from("work_site").upsert({ id: 1, name: "Sonorous — Vapi", center_lat: 20.3734, center_lon: 72.9141, radius_meters: 1000 }, { onConflict: "id" });
+          results.push("work_site: seeded");
+        } else {
+          results.push("work_site: exists");
+        }
+
+        return ok({ ok: true, results });
       }
 
       // ── 404 ──
