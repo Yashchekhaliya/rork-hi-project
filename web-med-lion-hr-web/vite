@@ -1,4 +1,0 @@
-#!/bin/sh
-# Wrapper that invokes vite from node_modules.
-# Used by "bun run build" when vite is not on PATH.
-exec node "$(dirname "$0")/node_modules/vite/bin/vite.js" "$@"

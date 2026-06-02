@@ -95,7 +95,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 }
 
 export const api = {
-  health: () => tryServer<{ ok: boolean; name: string }>("/health"),
+  health: () => request<{ ok: boolean; name: string }>("/health"),
 
   adminLogin: (userId: string, password: string) =>
     request<{ ok: boolean; token: string }>("/admin/login", {
